@@ -1,4 +1,4 @@
-# Subnetting-LastProject-ULima
+
 This is a repository where i show you what i learned about subnetting doing the last project of my course titled "comunicación de datos" at Universidad de Lima. In this project I used Cisco Packet Tracer to implement the routing plan, the dns server, protocols such as FTP, TELNET and dynamic routing (DCHP). 
 
 ## IMPORTANT CONCEPTS
@@ -78,21 +78,166 @@ The project has the next instructions:
 2- Implementation (Second deliverable): The designed addressing plan must be implemented using Cisco software: Packet Tracer. Select both communication equipment and end devices, as well as suitable tranmission media, accurately. It is suggested that the router at the central headquarters is the DCE (Data Communication Equipment) and the other fives are the DTE (Data Terminal Equipment). As total connectivity is required, it's suggested to use static routes to achieve this communication scenario between branches.
 
 
-
-
-
 ## IMPLEMENTATION
 
 ### Finding the subnetting mask
   Making a sum of all the hosts required to connect we can see that in total is 1580 hosts while the network mask is /17 which allow us to have 32768 hosts. As we can the difference is a lot so we need to reduce the number of hosts     
-  because there are many host ip address that won't be used, so we determined that a subnetting mask of /11 will give us 2048 hosts which meets the requirement of 1580 hosts. So the new subnetting mask will be /11 and its from these     
-  point where we'll start to find the ip address for each branch and central server.
+  because there are many host ip address that won't be used, so we determined that a subnetting mask of /21 will give us 2048 hosts (2**11) which meets the requirement of 1580 hosts. So the new subnetting mask will be /11 and its from     this point where we'll start to find the ip address for each branch and central server.
 
-### 
-    
-    
-    
+  *New subnetting mask: 255.255.248.0*
 
+### Making the subnetting tree
+  We put each branch and central server its subnetting mask 
+  
+  ![image](https://github.com/adrielardiles/Subnetting-Exercise/assets/120150352/a179cdec-d65d-45fe-89f2-d1420eb432b4)
+
+### Assining IP address and mask to each one
+
+  ![image](https://github.com/adrielardiles/Subnetting-Exercise/assets/120150352/924bdfff-c81f-4bdf-a074-3692a7084962)
+
+### To put IP Address to each SC we use the following command
+
+
+```
+!SC
+
+configure terminal
+
+interface  f 0/0
+
+ip address 179.62.0.1 255.255.254.0
+
+no shutdown
+
+interface  f 0/1
+
+ip address 179.62.2.1 255.255.255.0
+
+no shutdown
+
+interface  f 1/0
+ip address 179.62.3.1 255.255.255.128
+
+no shutdown
+
+interface s 0/0/0
+
+ip address 179.62.7.129 255.255.255.252
+
+clock rate 64000
+bandwidth 15000
+no shutdown
+
+interface s 0/0/1
+
+ip address 179.62.7.133 255.255.255.252
+
+clock rate 64000
+bandwidth 15000
+no shutdown
+
+interface s 0/1/0
+
+ip address 179.62.7.137 255.255.255.252
+
+clock rate 64000
+bandwidth 10000
+no shutdown
+
+interface s 0/1/1
+
+ip address 179.62.7.141 255.255.255.252
+
+clock rate 64000
+bandwidth 10000
+no shutdown
+
+interface s 0/2/0
+
+ip address 179.62.7.145 255.255.255.252
+
+clock rate 64000
+bandwidth 10000
+no shutdown
+
+end
+
+wr
+
+```
+
+### Connect los switchers a los routers and the routers to the SC 
+
+```
+!S1
+
+configure terminal
+
+interface f 0/0
+
+ip address 179.62.4.1 255.255.255.0
+
+no shutdown
+
+
+interface s 0/0/0
+
+ip address 179.62.7.130 255.255.255.252
+
+no shutdown
+
+end
+
+```
+
+### Making the routing between SC and each router so they can have a bidirectional communication
+
+```
+!S1>>SC
+configure terminal 
+ip route 0.0.0.0 0.0.0.0 s 0/0/0
+end
+```
+
+### Putting telnet to each router
+
+```
+!clave telnet
+configure terminal
+line vty 0 4
+password grupo6
+login
+enable secret grupo6
+end
+```
+
+
+### Connecting through ftp protocol code
+
+```
+!ftp
+ftp 179.62.0.2
+Users: admin/user
+password: ulima/ulima
+```
+
+
+### Setting up a DNS Server
+
+1- Set the ip address for the DNS Server
+
+![image](https://github.com/adrielardiles/Subnetting-Exercise/assets/120150352/be71088c-ff06-4fab-8bd2-9727ffd8e53a)
+
+
+2- In the services we can set up the DNS service and defining which is the Name Server (the ip of the dns address) and the Arecord which are the domains and its IP address, for example www.admin.com will be related to 179.62.0.2 which is SC1
+
+![image](https://github.com/adrielardiles/Subnetting-Exercise/assets/120150352/deccf1ee-e9ab-4f1e-b1c9-bd1ab741a54c)
+
+## Final Result
+
+  ![image](https://github.com/adrielardiles/Subnetting-Exercise/assets/120150352/895b5e23-e421-495b-9599-b1bf0bf63438)
+
+We can use the TELNET and FTP protocol and we have a DNS Server which saved the domain name for SC1, SC2 and SC3
 
 
 
